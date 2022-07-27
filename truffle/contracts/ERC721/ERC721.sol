@@ -28,7 +28,7 @@ contract ERC721 is IERC721, IERC721Metadata {
         symbol = _symbol;
     }
 
-    function balanceOf(address _owner) external override view returns(uint) {
+    function balanceOf(address _owner) public override view returns(uint) {
         // 지갑 주소가 존재하는 주소여야 한다.
         require(_owner != address(0), "ERC721: no address exist" );
         // 매핑을 이용해 소유 토큰 수 확인
@@ -42,9 +42,11 @@ contract ERC721 is IERC721, IERC721Metadata {
     }
 
     function approve(address _to, uint _tokenId) external override {
-        address owner = ownerOf(_tokenId);
+        address owner = _owners[_tokenId];
         require(_to != owner, "ERC721 : cannot approve to yourself");
 
+        require( msg.sender == owner || isApprovedForAll(owner, msg.sender));
+        // 주인이 직접 _to에게 위임하거나 원주인에게서 위임을 받은 사람이 다시 위임을 하거나..(복대리)
         _tokenApprovals[_tokenId] = _to;
         // 새로운 매핑 관계 형성
         emit Approval(owner, _to, _tokenId);
@@ -98,9 +100,12 @@ contract ERC721 is IERC721, IERC721Metadata {
         address owner = ownerOf(_tokenId);
         require(owner == address(0));
 
+        _afterToken(address(0), _to, _tokenId);
         _balances[_to] += 1;
         _owners[_tokenId] = _to;
 
         emit Transfer(address(0), _to, _tokenId);
     }
+
+    function _afterToken(address _from, address _to, uint _token) internal virtual {}
 }
