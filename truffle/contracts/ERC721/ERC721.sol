@@ -23,7 +23,10 @@ contract ERC721 is IERC721, IERC721Metadata {
     // a가 b에게 위임을 맡겼다면 a => mapping( b => true )
     mapping (address => mapping(address => bool)) private _operatorApprovals;
 
-    //
+    constructor(string memory _name, string memory _symbol) {
+        name = _name;
+        symbol = _symbol;
+    }
 
     function balanceOf(address _owner) external override view returns(uint) {
         // 지갑 주소가 존재하는 주소여야 한다.
